@@ -43,7 +43,6 @@ export async function mealsRoutes(app: FastifyInstance) {
   );
 
   app.post("/", async (request, reply) => {
-    console.log({ body: request.body });
     const createMealBodySchema = z.object({
       title: z.string(),
       description: z.string(),
@@ -74,4 +73,57 @@ export async function mealsRoutes(app: FastifyInstance) {
 
     return reply.status(201).send();
   });
+
+  app.patch(
+    "/:meal_id",
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const getMealParamSchema = z.object({
+        meal_id: z.coerce.number(),
+      });
+      const { meal_id } = getMealParamSchema.parse(request.params);
+
+      const createMealBodySchema = z.object({
+        title: z.string(),
+        description: z.string(),
+        date_time: z.coerce.date().default(new Date()),
+        on_diet: z.boolean(),
+      });
+
+      const { title, description, date_time, on_diet } =
+        createMealBodySchema.parse(request.body);
+
+      await knex("meals")
+        .where({
+          id: meal_id,
+        })
+        .update({
+          title,
+          description,
+          date_time,
+          on_diet,
+        });
+    },
+  );
+
+  app.delete(
+    "/:meal_id",
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const getMealParamSchema = z.object({
+        meal_id: z.coerce.number(),
+      });
+      const { meal_id } = getMealParamSchema.parse(request.params);
+
+      await knex("meals")
+        .where({
+          id: meal_id,
+        })
+        .delete();
+    },
+  );
 }
