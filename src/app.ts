@@ -3,6 +3,7 @@ import fastify from "fastify";
 
 import { env } from "./env";
 import { mealsRoutes } from "./routes/meals";
+import { summaryRoutes } from "./routes/summary";
 import { transactionsRoutes } from "./routes/transactions";
 import { usersRoutes } from "./routes/users";
 
@@ -20,6 +21,10 @@ app.register(usersRoutes, {
 
 app.register(mealsRoutes, {
   prefix: "meals",
+});
+
+app.register(summaryRoutes, {
+  prefix: "summary",
 });
 
 app.get("/", async (request, reply) => {
