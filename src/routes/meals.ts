@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { knex } from "../database";
@@ -42,37 +41,36 @@ export async function mealsRoutes(app: FastifyInstance) {
     },
   );
 
-  app.post("/", async (request, reply) => {
-    const createMealBodySchema = z.object({
-      title: z.string(),
-      description: z.string(),
-      date_time: z.coerce.date().default(new Date()),
-      on_diet: z.boolean(),
-      user_id: z.string(),
-    });
-
-    const { title, description, date_time, on_diet, user_id } =
-      createMealBodySchema.parse(request.body);
-
-    let sessionId = request.cookies.sessionId;
-    if (!sessionId) {
-      sessionId = randomUUID();
-      reply.setCookie("sessionId", sessionId, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, //7days
+  app.post(
+    "/",
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const createMealBodySchema = z.object({
+        title: z.string(),
+        description: z.string(),
+        date_time: z.coerce.date().default(new Date()),
+        on_diet: z.boolean(),
+        user_id: z.string().optional(),
       });
-    }
 
-    await knex("meals").insert({
-      title,
-      description,
-      date_time,
-      on_diet,
-      user_id: sessionId,
-    });
+      const { title, description, date_time, on_diet, user_id } =
+        createMealBodySchema.parse(request.body);
 
-    return reply.status(201).send();
-  });
+      const { sessionId } = request.cookies;
+
+      await knex("meals").insert({
+        title,
+        description,
+        date_time,
+        on_diet,
+        user_id: sessionId,
+      });
+
+      return reply.status(201).send();
+    },
+  );
 
   app.patch(
     "/:meal_id",

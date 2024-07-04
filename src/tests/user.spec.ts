@@ -20,7 +20,7 @@ describe("Users routes", () => {
   it("should be able to create a new user", async () => {
     const response = await request(app.server)
       .post("/users")
-      .send({ name: "John Doe", email: "johndoe@gmail.com" })
+      .send({ name: "Zé da Silva", email: "emaildoze@gmail.com" })
       .expect(201);
 
     const cookies = response.get("Set-Cookie");
