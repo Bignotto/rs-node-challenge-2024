@@ -22,7 +22,6 @@ export async function summaryRoutes(app: FastifyInstance) {
       let streak = 0;
       let bestStreak = 0;
       for (let i = 0; i < meals.length; i++) {
-        console.log({ i, streak, bestStreak });
         if (!!meals[i].on_diet === false) {
           bestStreak = streak > bestStreak ? streak : bestStreak;
           streak = 0;
